@@ -11,6 +11,9 @@
     <div class="button-wrapper">
         <a href="{{ url_for('add_expense') }}" class="nav-button">Add Expense</a>
     </div>
+    <div class="button-wrapper">
+        <a href="{{ url_for('add_income') }}" class="nav-button">Add Income</a>
+    </div>
 
     <h2 class="brand">Expense List</h2>
     <ul>
@@ -34,6 +37,20 @@
         {% endfor %}
         {% else %}
         <li>No expenses added yet.</li>
+        {% endif %}
+    </ul>
+    <h2 class="brand">Income List</h2>
+    <ul>
+        {% if incomes %}
+        {% for income in incomes %}
+        <li class="expense-item">
+                <span class="expense-text">
+                    £{{ "%.2f"|format(income.get_amount()) }} - {{ income.created_at }}
+                </span>
+        </li>
+        {% endfor %}
+        {% else %}
+        <li>No incomes added yet.</li>
         {% endif %}
     </ul>
 </div>
