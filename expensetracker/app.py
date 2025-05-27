@@ -22,8 +22,8 @@ def convert_to_local(utc_dt):
 
 @app.route('/', methods=["GET"])
 def expense_list():
-    incomes = Income.query.all()
-    expenses = Expense.query.all()
+    incomes = Income.query.paginate(per_page=8)
+    expenses = Expense.query.paginate(per_page=8)
     total_income = db.session.query(func.sum(Income.amount)).scalar() or 0
     total_expenses = db.session.query(func.sum(Expense.amount)).scalar() or 0
     balance = total_income - total_expenses
