@@ -92,7 +92,25 @@ ul li.expense-item {
     border-left: 4px solid var(--royal-blue);
 }
 
+ul li.income-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.5rem 0;
+    background-color: var(--card);
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    border-left: 4px solid var(--royal-blue);
+}
+
 .expense-text {
+    flex-grow: 1;
+    margin-right: 1rem;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+.income-text {
     flex-grow: 1;
     margin-right: 1rem;
     line-height: 1.2;
@@ -106,7 +124,15 @@ ul li.expense-item {
     margin-top: 0;
 }
 
-.action-button {
+.income-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0;
+}
+
+.action-button,
+.action-button[type="submit"] {
     padding: 0.25rem 0.6rem;
     border-radius: 4px;
     font-weight: bold;
@@ -118,9 +144,10 @@ ul li.expense-item {
     align-items: center;
     justify-content: center;
     height: 1.8rem;
-    min-width: 3.5rem;
+    width: 5rem;
     line-height: 1;
     text-align: center;
+    box-sizing: border-box;
 }
 
 .edit-button {
@@ -162,4 +189,27 @@ ul li.expense-item {
 
 .nav-button:hover {
     background-color: #274bb8;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.income-button {
+    background-color: #2e8b57;
+}
+
+.income-button:hover {
+    background-color: #256f47;
+}
+
+.expense-button {
+    background-color: #e60000;
+}
+
+.expense-button:hover {
+    background-color: #b30000;
 }
