@@ -1,8 +1,11 @@
 from datetime import datetime
 from flask_wtf import FlaskForm
+from flask_wtf.form import SUBMIT_METHODS
 from sqlalchemy.orm import Mapped, mapped_column
 from wtforms import StringField, DecimalField
-from wtforms.validators import DataRequired
+from wtforms.fields.datetime import DateField
+from wtforms.fields.simple import SubmitField
+from wtforms.validators import DataRequired, Optional
 from sqlalchemy import String, DateTime
 from base import db
 
@@ -47,3 +50,8 @@ class Income(db.Model):
 class AddIncome(FlaskForm):
     category = StringField('category', validators=[DataRequired()])
     amount = DecimalField('amount', places=2, validators=[DataRequired()])
+
+# Class for filtering dates
+class FilterForm(FlaskForm):
+    start_date = DateField('Start Date', format='&Y-%m-%d', validators=[Optional()])
+    end_date = DateField('End Date', format='&Y-%m-%d', validators=[Optional()])

@@ -1,8 +1,9 @@
 from base import db
 from flask import Flask, url_for, render_template, redirect, request
-from model import Expense, AddExpense, AddIncome, Income
+from model import Expense, AddExpense, AddIncome, Income, FilterForm
 from pytz import timezone, UTC
-from sqlalchemy import func
+from sqlalchemy import func, desc
+from datetime import date
 
 app = Flask(__name__)
 # configure the SQLite database, relative to the app instance folder
@@ -21,9 +22,9 @@ def convert_to_local(utc_dt):
 
 
 @app.route('/', methods=["GET"])
-def expense_list():
-    incomes = Income.query.paginate(per_page=8)
-    expenses = Expense.query.paginate(per_page=8)
+def dashboard():
+    incomes = Income.query.order_by(desc(Income.created_at)).paginate(per_page=8)
+    expenses = Expense.query.order_by(desc(Expense.created_at)).paginate(per_page=8)
     total_income = db.session.query(func.sum(Income.amount)).scalar() or 0
     total_expenses = db.session.query(func.sum(Expense.amount)).scalar() or 0
     balance = total_income - total_expenses
@@ -48,7 +49,7 @@ def add_expense():
         # Adding the task to the list
         db.session.add(create_expense)
         db.session.commit()
-        return redirect(url_for('expense_list'))
+        return redirect(url_for('dashboard'))
     return render_template("add_expense.html", form=form)
 
 
@@ -60,7 +61,7 @@ def edit_expense(expense_id):
         expense.category = request.form["category"]
         expense.set_amount(float(request.form["amount"]))  # ← convert input string to float
         db.session.commit()
-        return redirect(url_for("expense_list"))
+        return redirect(url_for("dashboard"))
 
     return render_template("edit_expense.html", expense=expense)
 
@@ -73,7 +74,7 @@ def delete_expense(expense_id):
     if request.method == "POST":
         db.session.delete(expense)
         db.session.commit()
-        return redirect(url_for("expense_list"))
+        return redirect(url_for("dashboard"))
 
     return render_template("index.html", expense=expense)
 
@@ -88,7 +89,7 @@ def add_income():
         # Adding the task to the list
         db.session.add(create_income)
         db.session.commit()
-        return redirect(url_for('expense_list'))
+        return redirect(url_for('dashboard'))
     return render_template("add_income.html", form=form)
 
 
@@ -100,7 +101,7 @@ def edit_income(income_id):
         income.category = request.form["category"]
         income.set_amount(float(request.form["amount"]))  # ← convert input string to float
         db.session.commit()
-        return redirect(url_for("expense_list"))
+        return redirect(url_for("dashboard"))
 
     return render_template("edit_income.html", income=income)
 
@@ -113,6 +114,62 @@ def delete_income(income_id):
     if request.method == "POST":
         db.session.delete(income)
         db.session.commit()
-        return redirect(url_for("expense_list"))
+        return redirect(url_for("dashboard"))
 
     return render_template("index.html", income=income)
+
+@app.route('/view/incomes', methods=["GET", "POST"])
+def view_incomes():
+    incomes = Income.query.order_by(desc(Income.created_at)).all()
+    form = FilterForm()
+    query = Income.query
+    for income in incomes:
+        income.created_at = convert_to_local(income.created_at)
+    if form.validate_on_submit():
+        if form.start_date.data:
+            query = query.filter(Income.created_at >= form.start_date.data)
+        if form.end_date.data:
+            query = query.filter(Income.created_at <= form.end_date.data)
+    return render_template("view_incomes.html", incomes=incomes, form=form)
+
+@app.route('/view/filtered_incomes')
+def filtered_incomes():
+    incomes = Income.query.order_by(desc(Income.created_at)).all()
+    form = FilterForm()
+    query = Income.query
+    for income in incomes:
+        income.created_at = convert_to_local(income.created_at)
+    if form.validate_on_submit():
+        if form.start_date.data:
+            query = query.filter(Income.created_at >= form.start_date.data)
+        elif form.end_date.data:
+            query = query.filter(Income.created_at <= form.end_date.data)
+    return render_template("filtered_incomes.html", incomes=incomes, form=form)
+
+@app.route('/view/expenses', methods=["GET", "POST"])
+def view_expenses():
+    expenses = Expense.query.order_by(desc(Expense.created_at)).all()
+    form = FilterForm()
+    query = Expense.query
+    for expense in expenses:
+        expense.created_at = convert_to_local(expense.created_at)
+    if form.validate_on_submit():
+        if form.start_date.data:
+            query = query.filter(Expense.created_at >= form.start_date.data)
+        if form.end_date.data:
+            query = query.filter(Expense.created_at <= form.end_date.data)
+    return render_template("view_expenses.html", expenses=expenses, form=form)
+
+@app.route('/view/filtered_expenses')
+def filtered_expenses():
+    expenses = Expense.query.order_by(desc(Expense.created_at)).all()
+    form = FilterForm()
+    query = Expense.query
+    for expense in expenses:
+        expense.created_at = convert_to_local(expense.created_at)
+    if form.validate_on_submit():
+        if form.start_date.data:
+            query = query.filter(Expense.created_at >= form.start_date.data)
+        elif form.end_date.data:
+            query = query.filter(Expense.created_at <= form.end_date.data)
+    return render_template("filtered_expenses.html", expenses=expenses, form=form)
