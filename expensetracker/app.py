@@ -3,7 +3,8 @@ from flask import Flask, url_for, render_template, redirect, request
 from model import Expense, AddExpense, AddIncome, Income, FilterForm
 from pytz import timezone, UTC
 from sqlalchemy import func, desc
-from datetime import date
+
+
 
 app = Flask(__name__)
 # configure the SQLite database, relative to the app instance folder
@@ -120,56 +121,30 @@ def delete_income(income_id):
 
 @app.route('/view/incomes', methods=["GET", "POST"])
 def view_incomes():
-    incomes = Income.query.order_by(desc(Income.created_at)).all()
-    form = FilterForm()
-    query = Income.query
-    for income in incomes:
-        income.created_at = convert_to_local(income.created_at)
+    query = Income.query.order_by(desc(Income.created_at))
+    form = FilterForm(meta={'csrf': False})
     if form.validate_on_submit():
         if form.start_date.data:
             query = query.filter(Income.created_at >= form.start_date.data)
         if form.end_date.data:
             query = query.filter(Income.created_at <= form.end_date.data)
-    return render_template("view_incomes.html", incomes=incomes, form=form)
-
-@app.route('/view/filtered_incomes')
-def filtered_incomes():
-    incomes = Income.query.order_by(desc(Income.created_at)).all()
-    form = FilterForm()
-    query = Income.query
+    incomes = query.all()
     for income in incomes:
         income.created_at = convert_to_local(income.created_at)
-    if form.validate_on_submit():
-        if form.start_date.data:
-            query = query.filter(Income.created_at >= form.start_date.data)
-        elif form.end_date.data:
-            query = query.filter(Income.created_at <= form.end_date.data)
-    return render_template("filtered_incomes.html", incomes=incomes, form=form)
+
+    return render_template("view_incomes.html", incomes=incomes, form=form)
 
 @app.route('/view/expenses', methods=["GET", "POST"])
 def view_expenses():
-    expenses = Expense.query.order_by(desc(Expense.created_at)).all()
-    form = FilterForm()
-    query = Expense.query
-    for expense in expenses:
-        expense.created_at = convert_to_local(expense.created_at)
+    query = Expense.query.order_by(desc(Expense.created_at))
+    form = FilterForm(meta={'csrf': False})
     if form.validate_on_submit():
         if form.start_date.data:
             query = query.filter(Expense.created_at >= form.start_date.data)
         if form.end_date.data:
             query = query.filter(Expense.created_at <= form.end_date.data)
-    return render_template("view_expenses.html", expenses=expenses, form=form)
-
-@app.route('/view/filtered_expenses')
-def filtered_expenses():
-    expenses = Expense.query.order_by(desc(Expense.created_at)).all()
-    form = FilterForm()
-    query = Expense.query
+    expenses = query.all()
     for expense in expenses:
         expense.created_at = convert_to_local(expense.created_at)
-    if form.validate_on_submit():
-        if form.start_date.data:
-            query = query.filter(Expense.created_at >= form.start_date.data)
-        elif form.end_date.data:
-            query = query.filter(Expense.created_at <= form.end_date.data)
-    return render_template("filtered_expenses.html", expenses=expenses, form=form)
+
+    return render_template("view_expenses.html", expenses=expenses, form=form)
